@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bdpaiton — journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --forest:#2d4a2d;--moss:#4a7c3f;--sage:#7aab6d;--fern:#a8c99a;
+  --bark:#5c3d1e;--soil:#3d2b1a;--clay:#8b5e3c;
+  --cream:#f5f0e8;--parchment:#ede4d0;--mushroom:#c4a882;
+  --ink:#1e1a14;--muted:#6b5d4a;--light-moss:#e8f0e4;
+}
+html{scroll-behavior:smooth}
+body{background:var(--parchment);font-family:'Nunito',sans-serif;color:var(--ink)}
+.site{width:100%;max-width:900px;margin:0 auto;background:var(--parchment)}
+
+/* NAV */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:var(--forest);position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--fern);letter-spacing:0.04em;cursor:pointer;text-decoration:none}
+.nav-links{display:flex;gap:6px}
+.nav-btn{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--sage);cursor:pointer;font-weight:700;padding:7px 14px;border-radius:20px;border:none;background:transparent;transition:all .2s;font-family:'Nunito',sans-serif}
+.nav-btn:hover,.nav-btn.active{background:var(--moss);color:var(--fern)}
+.page{display:none}.page.active{display:block}
+.tx{height:7px;background:repeating-linear-gradient(90deg,var(--moss) 0,var(--moss) 6px,var(--bark) 6px,var(--bark) 12px,var(--forest) 12px,var(--forest) 18px,var(--clay) 18px,var(--clay) 24px)}
+
+/* JOURNAL */
+.j-hero{background:var(--forest);padding:56px 40px 64px;position:relative;overflow:hidden}
+.j-hero-orbs{position:absolute;top:0;right:0;width:100%;height:100%;pointer-events:none;opacity:.07}
+.j-hero-content{position:relative;z-index:2}
+.j-hero-tag{display:inline-block;background:var(--moss);color:var(--fern);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:22px;font-weight:700}
+.j-hero-title{font-family:'Playfair Display',serif;font-size:58px;font-weight:700;line-height:1.05;color:var(--fern)}
+.j-hero-title span{color:var(--mushroom);font-style:italic}
+.j-hero-rule{width:52px;height:3px;background:var(--clay);border-radius:2px;margin:20px 0}
+.j-hero-sub{font-size:15px;line-height:1.78;color:var(--sage);max-width:500px;font-weight:300}
+.j-stats{display:flex;gap:32px;margin-top:28px;flex-wrap:wrap}
+.j-stat-n{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--mushroom)}
+.j-stat-l{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--sage);margin-top:3px;font-weight:600}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:18px 32px;background:var(--soil);overflow-x:auto}
+.fl{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mushroom);font-weight:700;white-space:nowrap}
+.fc{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 13px;border-radius:20px;border:1px solid rgba(196,168,130,0.3);color:var(--mushroom);cursor:pointer;white-space:nowrap;background:transparent;font-family:'Nunito',sans-serif;font-weight:700;transition:all .2s}
+.fc:hover,.fc.on{background:var(--clay);border-color:var(--clay);color:var(--cream)}
+.entries{padding:24px 32px;display:flex;flex-direction:column;gap:10px}
+.year-div{display:flex;align-items:center;gap:14px;padding:8px 0 4px}
+.ydl{flex:1;height:1px;background:rgba(92,61,30,0.2)}
+.ydt{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;color:var(--clay);white-space:nowrap}
+.entry{display:grid;grid-template-columns:80px 1fr;background:var(--cream);border-radius:12px;overflow:hidden;border:1px solid rgba(92,61,30,0.13);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.entry:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(45,74,45,0.13)}
+.entry.red .e-side{background:#2a1008}
+.entry.warm .e-side{background:#3a2808}
+.e-side{background:var(--forest);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 6px;gap:2px}
+.e-day{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--fern);line-height:1}
+.entry.red .e-day{color:#f0a090}
+.entry.warm .e-day{color:var(--mushroom)}
+.e-mon{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage);font-weight:700}
+.e-yr{font-size:9px;color:var(--moss);font-weight:600}
+.entry.red .e-mon,.entry.red .e-yr{color:#a06050}
+.entry.warm .e-mon,.entry.warm .e-yr{color:rgba(196,168,130,0.7)}
+.e-main{padding:22px 26px}
+.e-loc{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.e-dot{width:7px;height:7px;border-radius:50%;background:var(--moss);flex-shrink:0}
+.entry.red .e-dot{background:#d4614a}
+.entry.warm .e-dot{background:var(--clay)}
+.e-loct{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--clay);font-weight:700}
+.entry.red .e-loct{color:#7a2a1a}
+.e-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;line-height:1.2;margin-bottom:10px;color:var(--soil)}
+.e-body{font-size:13.5px;line-height:1.8;color:var(--muted);font-weight:300}
+.e-body p{margin-bottom:10px}
+.e-body p:last-child{margin-bottom:0}
+.e-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:8px}
+.e-tags{display:flex;gap:6px;flex-wrap:wrap}
+.etag{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--forest);background:rgba(74,124,63,0.12);border:1px solid rgba(74,124,63,0.25);padding:3px 9px;border-radius:20px;font-weight:700}
+.etag.r{color:#7a1a0a;background:rgba(212,97,74,0.1);border-color:rgba(212,97,74,0.25)}
+.etag.w{color:#5c3d1e;background:rgba(139,94,60,0.12);border-color:rgba(139,94,60,0.25)}
+.e-read{font-size:11px;color:var(--clay);letter-spacing:0.08em;font-weight:700}
+.manifesto{background:var(--moss);padding:44px 40px;text-align:center}
+.manifesto-q{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;font-style:italic;color:var(--parchment);line-height:1.5;max-width:580px;margin:0 auto}
+.manifesto-a{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,240,232,0.5);margin-top:14px;font-weight:600}
+
+/* PHOTOS */
+.p-hero{background:var(--soil);padding:48px 40px 52px}
+.p-hero-title{font-family:'Playfair Display',serif;font-size:50px;font-weight:700;color:var(--mushroom)}
+.p-hero-title em{color:var(--fern);font-style:italic}
+.p-hero-sub{font-size:14px;line-height:1.75;color:rgba(196,168,130,0.7);max-width:480px;font-weight:300;margin-top:10px}
+.p-album-nav{display:flex;gap:8px;padding:20px 32px;background:var(--bark);overflow-x:auto}
+.p-ab{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:8px 18px;border-radius:20px;border:1px solid rgba(196,168,130,0.25);color:var(--mushroom);cursor:pointer;white-space:nowrap;background:transparent;font-family:'Nunito',sans-serif;font-weight:700;transition:all .2s}
+.p-ab:hover,.p-ab.on{background:var(--clay);border-color:var(--clay);color:var(--cream)}
+.p-albums{padding:28px 32px;display:flex;flex-direction:column;gap:36px}
+.p-album-header{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.p-album-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--soil)}
+.p-album-loc{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--clay);font-weight:700}
+.p-album-desc{font-size:13px;color:var(--muted);font-weight:300;margin-bottom:14px;line-height:1.65}
+.p-grid{display:grid;gap:6px}
+.p-grid.g2{grid-template-columns:repeat(2,1fr)}
+.p-grid.g3{grid-template-columns:repeat(3,1fr)}
+.p-grid.g4{grid-template-columns:repeat(4,1fr)}
+.p-grid.gf{grid-template-columns:2fr 1fr}
+.p-cell{border-radius:8px;overflow:hidden;position:relative;cursor:pointer;transition:opacity .15s}
+.p-cell:hover{opacity:.88}
+.p-fill{width:100%;min-height:130px;display:flex;align-items:center;justify-content:center;padding:20px}
+.p-fill.tall{min-height:260px}
+.p-ph{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-align:center;font-weight:700;padding:8px}
+.p-cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(30,26,20,0.78));padding:24px 14px 12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.88);font-weight:700}
+.p-upload{margin:0 32px 32px;border:2px dashed rgba(92,61,30,0.22);border-radius:12px;padding:28px;text-align:center}
+.p-upload-t{font-family:'Playfair Display',serif;font-size:20px;color:var(--bark);margin-bottom:8px}
+.p-upload-s{font-size:13px;color:var(--muted);font-weight:300}
+
+/* MAP */
+.m-hero{background:var(--forest);padding:48px 40px 52px}
+.m-hero-title{font-family:'Playfair Display',serif;font-size:50px;font-weight:700;color:var(--fern)}
+.m-hero-title em{color:var(--mushroom);font-style:italic}
+.m-hero-sub{font-size:14px;line-height:1.75;color:var(--sage);max-width:520px;font-weight:300;margin-top:12px}
+.m-body{padding:28px 32px}
+.m-map-wrap{background:var(--cream);border-radius:14px;border:1px solid rgba(92,61,30,0.15);overflow:hidden;margin-bottom:28px}
+.m-route-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(92,61,30,0.1);border-top:1px solid rgba(92,61,30,0.12)}
+.m-rc{background:var(--cream);padding:18px 22px}
+.m-rc-l{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:5px}
+.m-rc-v{font-family:'Playfair Display',serif;font-size:16px;color:var(--soil);line-height:1.3}
+.m-stops-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--soil);margin-bottom:16px}
+.m-stop{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid rgba(92,61,30,0.1)}
+.m-stop:last-child{border-bottom:none}
+.m-sl{display:flex;flex-direction:column;align-items:center;width:24px;flex-shrink:0}
+.m-dot{width:14px;height:14px;border-radius:50%;background:var(--moss);border:2px solid var(--fern);flex-shrink:0}
+.m-dot.start{background:var(--clay);border-color:var(--mushroom)}
+.m-dot.crash{background:#d4614a;border-color:#8b1a0a}
+.m-dot.home{background:var(--forest);border-color:var(--sage)}
+.m-dash{flex:1;width:2px;background:repeating-linear-gradient(to bottom,var(--moss) 0,var(--moss) 4px,transparent 4px,transparent 8px);margin-top:4px}
+.m-place{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--soil);margin-bottom:3px}
+.m-date{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:6px}
+.m-desc{font-size:13px;line-height:1.65;color:var(--muted);font-weight:300}
+.m-hls{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mhl{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--forest);background:rgba(74,124,63,0.12);border:1px solid rgba(74,124,63,0.25);padding:3px 9px;border-radius:20px;font-weight:700}
+.mhl.r{color:#7a1a0a;background:rgba(212,97,74,0.1);border-color:rgba(212,97,74,0.25)}
+.m-next{background:var(--bark);padding:32px 40px;border-radius:12px;margin-top:8px}
+.m-next-l{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mushroom);font-weight:700;margin-bottom:10px}
+.m-next-t{font-family:'Playfair Display',serif;font-size:22px;color:var(--fern);margin-bottom:8px}
+.m-next-s{font-size:13px;color:rgba(196,168,130,0.7);font-weight:300;line-height:1.65}
+
+/* ABOUT */
+.a-hero{background:var(--bark);padding:56px 40px 64px}
+.a-eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mushroom);font-weight:700;margin-bottom:16px}
+.a-title{font-family:'Playfair Display',serif;font-size:54px;font-weight:700;line-height:1.05;color:var(--fern)}
+.a-title em{color:var(--mushroom);font-style:italic}
+.a-rule{width:52px;height:3px;background:var(--moss);border-radius:2px;margin:22px 0}
+.a-bio{font-size:17px;line-height:1.8;color:var(--mushroom);max-width:560px;font-weight:300}
+.a-body{padding:0 32px 40px}
+.a-section{padding:32px 0;border-bottom:1px solid rgba(92,61,30,0.14)}
+.a-section:last-child{border-bottom:none}
+.a-sec-l{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--clay);font-weight:700;margin-bottom:18px}
+.a-values{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.a-val{background:var(--cream);border-radius:10px;padding:20px;border:1px solid rgba(92,61,30,0.12)}
+.a-val-icon{font-size:22px;margin-bottom:10px}
+.a-val-t{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--soil);margin-bottom:6px}
+.a-val-d{font-size:13px;line-height:1.65;color:var(--muted);font-weight:300}
+.a-tl{display:flex;flex-direction:column}
+.a-tl-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid rgba(92,61,30,0.08)}
+.a-tl-item:last-child{border-bottom:none}
+.a-tl-left{flex-shrink:0;width:90px}
+.a-tl-date{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--clay);font-weight:700;line-height:1.4}
+.a-tl-dot{width:10px;height:10px;border-radius:50%;background:var(--moss);margin-top:8px;margin-left:40px}
+.a-tl-t{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--soil);margin-bottom:4px}
+.a-tl-d{font-size:13px;line-height:1.65;color:var(--muted);font-weight:300}
+.a-gear{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.a-gear-item{background:var(--light-moss);border-radius:8px;padding:16px;border:1px solid rgba(74,124,63,0.18)}
+.a-gear-n{font-size:13px;font-weight:700;color:var(--forest);margin-bottom:3px}
+.a-gear-d{font-size:12px;color:var(--muted);font-weight:300}
+.a-contact{background:var(--forest);border-radius:12px;padding:32px;margin-top:8px;text-align:center}
+.a-contact-t{font-family:'Playfair Display',serif;font-size:26px;color:var(--fern);margin-bottom:10px}
+.a-contact-s{font-size:14px;color:var(--sage);font-weight:300;line-height:1.7;max-width:400px;margin:0 auto 20px}
+.a-contact-btn{display:inline-block;background:var(--moss);color:var(--fern);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;padding:10px 24px;border-radius:20px;font-weight:700;cursor:pointer;text-decoration:none}
+
+/* FOOTER */
+.footer{background:var(--soil);padding:24px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--mushroom);font-weight:700;cursor:pointer}
+.footer-links{display:flex;gap:20px}
+.footer-link{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;font-weight:600}
+.footer-note{font-size:11px;color:var(--muted);font-style:italic}
+
+@media(max-width:600px){
+  .j-hero-title{font-size:38px}
+  .nav{padding:14px 16px}
+  .nav-logo{font-size:18px}
+  .entries,.m-body,.a-body,.p-albums{padding-left:16px;padding-right:16px}
+  .j-hero,.m-hero,.p-hero,.a-hero{padding:40px 20px}
+  .filter-bar{padding:16px}
+  .a-values,.a-gear{grid-template-columns:1fr}
+  .p-grid.g3,.p-grid.g4{grid-template-columns:repeat(2,1fr)}
+  .footer{padding:20px 16px}
+  .m-route-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="site">
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo" onclick="showPage('journal')">bdpaiton</span>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('journal')">journal</button>
+    <button class="nav-btn" onclick="showPage('photos')">photos</button>
+    <button class="nav-btn" onclick="showPage('map')">map</button>
+    <button class="nav-btn" onclick="showPage('about')">about</button>
+  </div>
+</nav>
+
+<!-- ═══════════════ JOURNAL ═══════════════ -->
+<div id="page-journal" class="page active">
+  <div class="j-hero">
+    <svg class="j-hero-orbs" viewBox="0 0 900 400" preserveAspectRatio="xMidYMid slice">
+      <circle cx="720" cy="60" r="200" fill="#7aab6d"/>
+      <circle cx="800" cy="340" r="130" fill="#a8c99a"/>
+      <circle cx="620" cy="260" r="90" fill="#4a7c3f"/>
+    </svg>
+    <div class="j-hero-content">
+      <div class="j-hero-tag">march 2025 — march 2026</div>
+      <h1 class="j-hero-title">Beckett.<br><span>On the road.</span></h1>
+      <div class="j-hero-rule"></div>
+      <p class="j-hero-sub">I flew to Anchorage to get my pilot's license. I didn't get my pilot's license. I got a summer in Alaska, a job launching floatplanes, a girlfriend who lives in an ambulance, and a trip that took us from the Yukon to the Grand Canyon and back. This is all of it, written down so I don't forget.</p>
+      <div class="j-stats">
+        <div><div class="j-stat-n">Mar 5, '25</div><div class="j-stat-l">landed in anchorage</div></div>
+        <div><div class="j-stat-n">Sep 28</div><div class="j-stat-l">left heading south</div></div>
+        <div><div class="j-stat-n">Mar 9, '26</div><div class="j-stat-l">back home</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tx"></div>
+
+  <div class="filter-bar">
+    <span class="fl">filter:</span>
+    <button class="fc on">all</button>
+    <button class="fc">alaska</button>
+    <button class="fc">canada</button>
+    <button class="fc">pacific northwest</button>
+    <button class="fc">california</button>
+    <button class="fc">maggie</button>
+    <button class="fc">hard days</button>
+  </div>
+
+  <div class="entries">
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">late 2024 — the decision</div><div class="ydl"></div></div>
+
+    <div class="entry warm">
+      <div class="e-side"><div class="e-day">Oct</div><div class="e-mon">—</div><div class="e-yr">2024</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Raleigh, North Carolina</div></div>
+        <div class="e-title">Everything in Raleigh felt like a reminder of something I wanted to forget.</div>
+        <div class="e-body">
+          <p>I'd been managing a Backyard Burger for two years. I was going through a breakup — a bad one, the kind that makes everywhere you've ever been feel like evidence — and coming off a rough semester. Raleigh had started to feel like a room I was trapped in. I needed out.</p>
+          <p>My uncle is a UPS pilot who lives in Anchorage. He has a Cessna 172. Sometime around October he told me to come up in the summer of 2025 and work on my pilot's license. I said yes before he finished the sentence. I'd been to Alaska three times before and I already knew what it does to you — the scale of it, the way the mountains just sit there completely indifferent to your problems. That's what I needed.</p>
+          <p>I booked the flights around February 21st. Put in my two weeks at Backyard Burger. Told my friends, who were genuinely happy for me. The day I booked it I felt like I could breathe again for the first time in months. My parents were excited too — they'd seen Alaska get into me before. They knew what it meant.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag w">raleigh</span><span class="etag w">the decision</span><span class="etag w">fresh start</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">march 2025 — arriving</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">05</div><div class="e-mon">Mar</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Alaska — arrival</div></div>
+        <div class="e-title">Landed. Didn't know anyone in the city except my uncle. That felt exactly right.</div>
+        <div class="e-body">
+          <p>The view flying into Anchorage is the mountains. They just sit there — enormous, close, not caring about you at all. I'd seen them before but it still hit different coming in on that flight knowing I wasn't leaving for a while.</p>
+          <p>My uncle's house is huge. Three floors, five bedrooms, three-car garage. My cousins Naomi, Sam, and Anna all live in Anchorage too. By March 7th I was already out at the international airport plane spotting. On March 9th I did a snowy loop hike at Eagle River and stood on a frozen lake surrounded by mountains at the end of it. The trail was icy and I had no idea what I was doing and it was perfect.</p>
+          <p>March in Anchorage is cold but not brutal. The city is smaller than you expect but the wilderness right outside it is bigger than you can really prepare for. Within a week I felt more like myself than I had in months.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">anchorage</span><span class="etag">eagle river</span><span class="etag">arrival</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">11</div><div class="e-mon">Mar</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Lake Hood, Anchorage</div></div>
+        <div class="e-title">I walked into Regal Air with my resume. The owner hired me in ten minutes.</div>
+        <div class="e-body">
+          <p>My uncle found a Regal Air post on Facebook — they were hiring seasonal dock hands at Lake Hood. I didn't know what Lake Hood was yet. It's a floatplane base with over a thousand planes on it, either on the water or on the land around it. If you love aviation, it's the kind of place that makes you stop walking and just stand there for a second.</p>
+          <p>I walked in on March 11th, talked to the owner for about ten minutes, and got the job. I wouldn't start until the end of May, but I had it. A few days later on March 14th I was already out at my uncle's hangar helping pull the elevator off his Cessna 172 — it had gotten damaged months back and needed to be paint-stripped and repainted before it went back on. Not what I expected to be doing my second week in Alaska but I wasn't complaining.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">regal air</span><span class="etag">lake hood</span><span class="etag">uncle's cessna</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">26</div><div class="e-mon">Mar</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Alaska</div></div>
+        <div class="e-title">The aurora forecast was high. Me and Naomi drove out and stayed for thirty minutes.</div>
+        <div class="e-body">
+          <p>Something worth knowing about northern lights: your camera sees them way better than your naked eye does. The photos look like green curtains draped across the sky. In person they're more subtle — a glow, a shimmer, shapes you're not entirely sure are moving or if you're imagining it. Still incredible. Just different than what you expect from the pictures.</p>
+          <p>Me and my cousin Naomi drove out to watch them on March 26th. We were out there for about thirty minutes. I have pictures that look nothing like what I actually experienced, which is kind of the point. Some things don't compress into a photo.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">northern lights</span><span class="etag">naomi</span><span class="etag">anchorage</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">may 2025 — flying & working</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">19</div><div class="e-mon">May</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Matanuska-Susitna Valley, Alaska</div></div>
+        <div class="e-title">First flight. Two hours in the Mat-Su Valley and I forgot about everything else.</div>
+        <div class="e-body">
+          <p>My uncle had been working on the Cessna 172 since we paint-stripped the elevator back in March. Annual inspection was May 13th — I got to help with some of that too. On May 19th we finally flew. Two hours in the Matanuska-Susitna Valley practice area, me at the controls for most of it.</p>
+          <p>The Mat-Su Valley from the air is wide and flat with mountains on every side. At some point you stop trying to take it in and just fly. I ended up doing three flights total. The second one on May 27th was rainy — flying in the rain over Alaska is its own specific thing, all grey and green below you. I never got close to soloing. I'm not that worried about the license anymore. The summer gave me other things.</p>
+          <p>On May 3rd I went to the Alaska Aviation Gathering in Palmer with my uncle. Hundreds of planes, people who've been flying their whole lives, planes parked on grass in every direction. That night me and my cousin Sam had a pallet bonfire at Westchester Lagoon on the beach.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">first flight</span><span class="etag">mat-su valley</span><span class="etag">aviation gathering</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">june 2025 — parents visit</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">24</div><div class="e-mon">Jun</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Girdwood & Whittier, Alaska</div></div>
+        <div class="e-title">My parents flew up. We spent four days doing everything I'd been saving for them.</div>
+        <div class="e-body">
+          <p>My parents arrived around June 24th. We hit the Alaska Wildlife Conservation Center first — moose, bears, wolves, caribou. Not exactly things you see anywhere else. We drove to Girdwood and saw Virgin Creek Falls, then Bird Creek Falls. The Alyeska Resort has a gondola that goes up about 2,000 feet — we rode it to the top and stood there looking at the valley. Next day we did two hours of ATV riding through the woods to Bird Creek Falls.</p>
+          <p>June 26th I took my dad up Rendezvous Peak, just the two of us. That hike meant a lot. Big family bonfire that evening. June 27th we drove to Whittier and got on the 26 Glacier Cruise — seven hours, twenty-six glaciers, waterfalls running down mountainsides straight into the ocean, seals on ice. My dad kept going quiet in a way that told me he finally got it. Why I needed to come here. Why this place is different.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">parents visited</span><span class="etag">26 glacier cruise</span><span class="etag">rendezvous peak</span><span class="etag">girdwood</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">july 2025 — summer peak</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">04</div><div class="e-mon">Jul</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Alaska</div></div>
+        <div class="e-title">Mount Magnificent on July 4th. Seven hours. My favorite hike in Alaska, no question.</div>
+        <div class="e-body">
+          <p>Three peaks. About 4,000 feet at the top. Seven hours round trip. There's a weather station near the summit that's been sitting up there doing its thing in complete silence while you wheeze up the last stretch. When you get above the treeline and the valley opens up below you — a river running through it, mountains on the other side — it stops feeling like exercise and starts feeling like something else.</p>
+          <p>I've done a lot of hikes in Alaska by this point. Flat Top at sunset at 11pm when it's still light out, the Powerline Trail, the Eagle River loop in the snow, Byron Glacier where it felt like being inside an ice room. Mount Magnificent is still the one I think about. If you ever find yourself in Anchorage and can only do one hike, start early and go there.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">mount magnificent</span><span class="etag">hiking</span><span class="etag">chugach</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">14</div><div class="e-mon">Jul</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Homer, Denali & Eagle River</div></div>
+        <div class="e-title">Nate flew up for a week. We tried to do everything. We basically did.</div>
+        <div class="e-body">
+          <p>My friend Nate got to Anchorage on July 14th. We had five days. Girdwood and the Alyeska gondola first, 2,000 feet up. Pallet bonfire at Lynnary Park that night, met some people, stayed too late.</p>
+          <p>July 15th we drove all the way to Homer. The Spit is this narrow strip of land that stretches out into the bay with shops and docks packed onto it — surprisingly cool. Got pizza out there. Cooper Landing bonfire on the way back, mountains on every side, fire going, lake calm. July 16th we hiked Mount Magnificent together and then camped at Eagle River right on the river, the sound of it all night. July 17th: Denali, ziplining inside the park. July 18th Nate left. Having a piece of home show up in the middle of all of this was a good feeling.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">nate visited</span><span class="etag">homer</span><span class="etag">denali</span><span class="etag">eagle river</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">31</div><div class="e-mon">Jul</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Katmai National Park, Alaska</div></div>
+        <div class="e-title">My boss handed me a lunch and a jacket and said go. I saw twelve bears.</div>
+        <div class="e-body">
+          <p>Showed up to Regal Air at 7am like any other day. There was an empty seat on the Katmai flight. My boss — not the warmest guy, worked me pretty hard all summer — just told me to get on the plane. Two and a half hours each way, four flights total. I had five hours at Brooks Camp.</p>
+          <p>About twelve bears. I walked the trails alone, playing music out loud on my phone so they could hear me coming, kicking rocks down the path ahead of me. At the falls I watched them fish for fifteen minutes — standing maybe thirty feet away, completely in their own world. I was a dock hand from Raleigh, NC, in a national park in Alaska on a Tuesday because my boss had an empty seat and felt like being generous. The job wasn't always easy — yard work, loading luggage in the rain, taking heat from coworkers who didn't love having me around. Days like this made all of that irrelevant.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">katmai</span><span class="etag">brooks camp</span><span class="etag">bears</span><span class="etag">regal air</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">august 2025 — maggie</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">05</div><div class="e-mon">Aug</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Alaska</div></div>
+        <div class="e-title">She DM'd me first on July 5th. By August 5th I was asking her to be my girlfriend on her mattress at 11pm.</div>
+        <div class="e-body">
+          <p>I'd noticed Maggie at Sorrento's — we both worked there, I was a host, and I always thought she was beautiful but never really said much. She reached out first on July 5th. I know the exact date because I have a screenshot of her Instagram in my photos from that day.</p>
+          <p>First hangout was around July 25th — thrifting, got fries somewhere. July 27th we had a bonfire at Lynnary Park at 10pm and stayed until 3am. In Alaska in July, 10pm is still light out. That detail still gets me. August 3rd we took the ambulance out to a pull-off near Girdwood and had our first sleepover. We hiked Bird Creek Falls, built Legos, watched sunsets. On August 5th we went to Lynnary Park and then back to her place where the ambulance was parked. Late, maybe 11pm. We were lying on the mattress and I just asked her. Simple as that. She said yes. I gave her flowers the next day.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">maggie</span><span class="etag">sorrento's</span><span class="etag">lynnary park</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">22</div><div class="e-mon">Aug</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Seward, Alaska</div></div>
+        <div class="e-title">Our first real trip together. Exit Glacier, a bonfire, sandwiches on top of the ambulance.</div>
+        <div class="e-body">
+          <p>We left for Seward on August 22nd. Stopped at Cooper Landing on the way at 11am — lake, mountains, my go-to spot. Sea Life Center in Seward, then an afternoon thrifting. By 6pm we were at Exit Glacier in the national park, walked up to the face of it as close as you can get. Bonfire at the campsite that night next to the ambulance.</p>
+          <p>On the way back we pulled off for thirty minutes by a lake and sat on top of the ambulance eating sandwiches looking at the view. No plan, no schedule. Around this same time — late August — she asked me to come on the trip she was already planning. A drive south through Canada and down to the lower 48. She was going to do it alone. She invited me to come. I didn't have to think about it.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">seward</span><span class="etag">exit glacier</span><span class="etag">maggie</span><span class="etag">the trip begins forming</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-div"><div class="ydl"></div><div class="ydt">september 2025 — the build & departure</div><div class="ydl"></div></div>
+
+    <div class="entry">
+      <div class="e-side"><div class="e-day">28</div><div class="e-mon">Sep</div><div class="e-yr">2025</div></div>
+      <div class="e-main">
+        <div class="e-loc"><div class="e-dot"></div><div class="e-loct">Anchorage, Alaska — departure</div></div>
+        <div class="e-title">We finished the ceiling at 8pm. Left at 9. The floor was still covered in bags.</div>
+        <div class="e-body">
+          <p>The ambulance was completely empty when we started — bare metal walls, black surfaces, nothing. We built the whole thing in about three weeks in September. Tongue-and-groove floors, walls, a skylight, a raised bed platform, a two-sided fridge, a big power station, five-gallon water drum, curtains. Between the 25th and 26th we finished the bed frame. The ceiling went in on the 28th. We each got sick at least three times. Eight urgent care visits between us. I got tonsillitis. We kept building.</p>
+          <p>We left at 9pm. The floor was still buried in bags and suitcases and totes we didn't have time to sort — we'd wanted to leave no later than September 28th and that was that. Maggie's van life friend Maddie was coming with us in her own van, which made sense on a road as remote as the Alaska Highway. I watched Anchorage disappear in the side mirror as we drove out in the dark. Six months in that city. I came for a pilot's license and left with everything else.</p>
+        </div>
+        <div class="e-footer">
+          <div class="e-tags"><span class="etag">departure</span><span class="etag">ambulance build</span><span class="etag">alaska highway</span><span class="etag">the road begins</span></div>
+          <div class="e-read">read more →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="manifesto">
+    <div class="manifesto-q">"I flew to Alaska to get a pilot's license. I came home with a totaled car, a near-death experience, and the best year of my life."</div>
+    <div class="manifesto-a">— bdpaiton, March 2026</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo" onclick="showPage('journal')">bdpaiton</div>
+    <div class="footer-links">
+      <span class="footer-link" onclick="showPage('journal')">journal</span>
+      <span class="footer-link" onclick="showPage('photos')">photos</span>
+      <span class="footer-link" onclick="showPage('map')">map</span>
+      <span class="footer-link" onclick="showPage('about')">about</span>
+    </div>
+    <div class="footer-note">updated whenever life happens</div>
+  </div>
+</div>
+
+<!-- ═══════════════ PHOTOS ═══════════════ -->
+<div id="page-photos" class="page">
+  <div class="p-hero">
+    <h1 class="p-hero-title">The <em>archive.</em></h1>
+    <p class="p-hero-sub">Every shot worth keeping. Alaska, Canada, the west coast, the desert, and back. Organized by where we were.</p>
+  </div>
+  <div class="tx"></div>
+  <div class="p-album-nav">
+    <button class="p-ab on">all albums</button>
+    <button class="p-ab">🏔 alaska</button>
+    <button class="p-ab">🍁 yukon & canada</button>
+    <button class="p-ab">🌲 pacific northwest</button>
+    <button class="p-ab">🌊 oregon coast</button>
+    <button class="p-ab">🌵 southwest</button>
+    <button class="p-ab">☀️ california</button>
+    <button class="p-ab">🚑 ambulance life</button>
+  </div>
+  <div class="p-albums">
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">Alaska — the whole summer</div>
+        <div class="p-album-loc">📍 Anchorage, Katmai, Denali, Valdez, Girdwood, Whittier, Palmer, Seward</div>
+      </div>
+      <div class="p-album-desc">March through September 2025. Rendezvous Peak, Brooks Camp bears, Denali ziplining, Virgin Creek Falls, 26 Glacier Cruise, Mount Magnificent, Exit Glacier, the State Fair in Palmer. The best summer.</div>
+      <div class="p-grid g3">
+        <div class="p-cell"><div class="p-fill" style="background:#2d4a2d"><span class="p-ph" style="color:#7aab6d">Rendezvous Peak<br>Chugach NF</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1e2e3a"><span class="p-ph" style="color:#7ab0c4">Brooks Camp<br>Katmai NP</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1a2a1a"><span class="p-ph" style="color:#a8c99a">Denali NP</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#2a3a28"><span class="p-ph" style="color:#8fbe80">Virgin Creek Falls<br>Girdwood</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1a2e3a"><span class="p-ph" style="color:#7ab0c4">26 Glacier Cruise<br>Whittier</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#3d2b1a"><span class="p-ph" style="color:#c4a882">Alaska State Fair<br>Palmer</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">The Alaska Highway & Yukon</div>
+        <div class="p-album-loc">📍 Yukon Territory, Canada</div>
+      </div>
+      <div class="p-album-desc">Southbound Sep 2025 and northbound Mar 2026. One of the most remote roads on earth — and where the Crosstrek rolled near Little Teslin Lake.</div>
+      <div class="p-grid g2">
+        <div class="p-cell"><div class="p-fill" style="background:#1a2e1a"><span class="p-ph" style="color:#7aab6d">Alaska Highway<br>Yukon Territory</span></div><div class="p-cap">Southbound, Sep 2025</div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#0e1a0e"><span class="p-ph" style="color:#a8c99a">Alaska Highway<br>Northbound</span></div><div class="p-cap">Northbound, Mar 2026</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">North Cascades & Washington</div>
+        <div class="p-album-loc">📍 North Cascades NP, Mount Rainier NP</div>
+      </div>
+      <div class="p-album-desc">Diablo Lake with that impossible turquoise water. Maple Pass in fall color. Skyline Loop at Rainier. October 2025.</div>
+      <div class="p-grid g3">
+        <div class="p-cell"><div class="p-fill" style="background:#1a3040"><span class="p-ph" style="color:#7ab0c4">Diablo Lake<br>North Cascades</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#2a4a2a"><span class="p-ph" style="color:#a8c99a">Maple Pass<br>North Cascades</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1e3a28"><span class="p-ph" style="color:#8fbe80">Skyline Loop<br>Mt Rainier</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">Oregon Coast</div>
+        <div class="p-album-loc">📍 Depoe Bay, Florence, Yachats, Neptune State Park</div>
+      </div>
+      <div class="p-album-desc">Two days. Big rocks in the surf, fog that never fully lifted, slept to the sound of waves both nights.</div>
+      <div class="p-grid g4">
+        <div class="p-cell"><div class="p-fill" style="background:#1a2a3a"><span class="p-ph" style="color:#7ab0c4">Depoe Bay</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1e3040"><span class="p-ph" style="color:#8ab8cc">Florence</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#162030"><span class="p-ph" style="color:#7ab0c4">Yachats</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1a2a3a"><span class="p-ph" style="color:#8ab8cc">Neptune<br>State Park</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">Redwoods & the PCH</div>
+        <div class="p-album-loc">📍 Redwood National & State Parks, California</div>
+      </div>
+      <div class="p-album-desc">The Big Tree. Standing next to something that was alive 2,000 years ago makes you feel correctly small.</div>
+      <div class="p-grid g2">
+        <div class="p-cell"><div class="p-fill tall" style="background:#1e3a1a"><span class="p-ph" style="color:#a8c99a">Big Tree<br>Redwood NP</span></div><div class="p-cap">Redwood National Park</div></div>
+        <div class="p-cell"><div class="p-fill tall" style="background:#1a3028"><span class="p-ph" style="color:#8fbe80">Redwood State<br>Parks</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">Southern California</div>
+        <div class="p-album-loc">📍 Los Angeles, Laguna Beach, Griffith Observatory</div>
+      </div>
+      <div class="p-album-desc">Griffith Observatory at golden hour. Laguna Beach in winter. Nov 2025 through Feb 2026.</div>
+      <div class="p-grid g3">
+        <div class="p-cell"><div class="p-fill" style="background:#3a2a1a"><span class="p-ph" style="color:#c4a882">Griffith Observatory<br>Los Angeles</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#1a2a40"><span class="p-ph" style="color:#7ab0c4">Laguna Beach</span></div></div>
+        <div class="p-cell"><div class="p-fill" style="background:#3a2a1a"><span class="p-ph" style="color:#c4a882">Griffith at<br>sunset</span></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="p-album-header">
+        <div class="p-album-name">The Southwest</div>
+        <div class="p-album-loc">📍 Grand Canyon NP, Hoover Dam</div>
+      </div>
+      <div class="p-album-desc">Ooh-Aah Point on the South Kaibab Trail — you round the corner and the whole canyon opens up. Nothing prepares you for it.</div>
+      <div class="p-grid g2">
+        <div class="p-cell"><div class="p-fill tall" style="background:#5a3a1a"><span class="p-ph" style="color:#e8c882">Ooh-Aah Point<br>Grand Canyon NP</span></div><div class="p-cap">Grand Canyon National Park</div></div>
+        <div class="p-cell"><div class="p-fill tall" style="background:#3a2a1a"><span class="p-ph" style="color:#c4a882">Hoover Dam<br>Nevada/Arizona</span></div><div class="p-cap">Hoover Dam</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="p-upload">
+    <div class="p-upload-t">Your photos go here</div>
+    <div class="p-upload-s">When the site is live, drag and drop your actual photos into each album. Every trip, every moment — all in one place.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo" onclick="showPage('journal')">bdpaiton</div>
+    <div class="footer-note">photos from the road</div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAP ═══════════════ -->
+<div id="page-map" class="page">
+  <div class="m-hero">
+    <h1 class="m-hero-title">The <em>route.</em></h1>
+    <p class="m-hero-sub">Left Anchorage September 28th, 2025. Drove through the Yukon, BC, Washington, Oregon, California, Nevada, Arizona, and back. Rolled the car in the Yukon on March 5th, 2026. Made it back to Anchorage on March 9th.</p>
+  </div>
+  <div class="tx"></div>
+  <div class="m-body">
+
+    <div class="m-map-wrap">
+      <svg width="100%" viewBox="0 0 860 480" style="display:block;background:#c8dba8">
+        <defs>
+          <marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#5c3d1e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="100" height="480" fill="#b8d4e8" opacity=".65"/>
+        <ellipse cx="500" cy="0" rx="320" ry="90" fill="#9ab870" opacity=".4"/>
+        <ellipse cx="720" cy="0" rx="200" ry="65" fill="#8aab60" opacity=".35"/>
+        <path d="M560 38 C555 55 540 75 510 95 C480 115 440 125 400 130 C360 135 320 130 290 140 C260 150 245 165 230 185 C218 200 215 220 210 240 C205 260 205 280 200 305 C196 325 190 348 185 368 C180 385 174 400 168 418" stroke="#5c3d1e" stroke-width="2.5" fill="none" stroke-dasharray="7 4" opacity=".8"/>
+        <path d="M168 418 C172 400 178 382 186 362 C194 340 200 318 204 295 C208 270 210 248 215 225 C222 200 236 178 254 162 C272 148 295 140 320 138 C348 136 378 138 405 136 C435 132 460 122 488 105 C512 90 535 72 548 55 C554 46 558 42 562 38" stroke="#8b5e3c" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity=".55"/>
+        <circle cx="560" cy="38" r="10" fill="#2d4a2d" stroke="#7aab6d" stroke-width="2.5"/>
+        <circle cx="560" cy="38" r="4" fill="#a8c99a"/>
+        <circle cx="450" cy="126" r="7" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="282" cy="185" r="7" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="200" cy="248" r="7" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="193" cy="290" r="7" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="186" cy="320" r="6" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="174" cy="350" r="6" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="168" cy="380" r="6" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/>
+        <circle cx="168" cy="418" r="8" fill="#c4a882" stroke="#5c3d1e" stroke-width="2"/>
+        <circle cx="490" cy="105" r="9" fill="#d4614a" stroke="#8b1a0a" stroke-width="2"/>
+        <text x="490" y="109" text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="Nunito,sans-serif">!</text>
+        <text x="580" y="34" font-size="12" fill="#2d4a2d" font-weight="700" font-family="Nunito,sans-serif">Anchorage</text>
+        <text x="580" y="46" font-size="9" fill="#4a7c3f" font-family="Nunito,sans-serif">Sep 28 '25 → Mar 9 '26</text>
+        <text x="464" y="122" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif">Whitehorse, YT</text>
+        <text x="220" y="181" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif">Prince George, BC</text>
+        <text x="220" y="192" font-size="8" fill="#6b5d4a" font-family="Nunito,sans-serif">Oct 2 — brake disaster</text>
+        <text x="132" y="244" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif" text-anchor="end">Vancouver, BC</text>
+        <text x="132" y="286" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif" text-anchor="end">N Cascades / Seattle</text>
+        <text x="132" y="316" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif" text-anchor="end">Portland</text>
+        <text x="132" y="346" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif" text-anchor="end">Oregon Coast</text>
+        <text x="132" y="376" font-size="10" fill="#1e1a14" font-weight="700" font-family="Nunito,sans-serif" text-anchor="end">Redwoods, CA</text>
+        <text x="182" y="436" font-size="11" fill="#5c3d1e" font-weight="700" font-family="Nunito,sans-serif">Southern California</text>
+        <text x="182" y="447" font-size="9" fill="#8b5e3c" font-family="Nunito,sans-serif">Nov 2025 – Feb 20, 2026</text>
+        <text x="506" y="98" font-size="10" fill="#8b1a0a" font-weight="700" font-family="Nunito,sans-serif">Little Teslin Lake</text>
+        <text x="506" y="109" font-size="8" fill="#8b1a0a" font-family="Nunito,sans-serif">Crosstrek rolled, Mar 5</text>
+        <text x="620" y="80" font-size="9" fill="#8b5e3c" font-family="Nunito,sans-serif" font-style="italic">- - - return route</text>
+        <rect x="620" y="390" width="224" height="76" rx="8" fill="white" fill-opacity=".78"/>
+        <circle cx="638" cy="406" r="5" fill="#2d4a2d" stroke="#7aab6d" stroke-width="1.5"/><text x="648" y="410" font-size="10" fill="#3d2b1a" font-family="Nunito,sans-serif" font-weight="600">home base (Anchorage)</text>
+        <circle cx="638" cy="423" r="5" fill="#7aab6d" stroke="#2d4a2d" stroke-width="1.5"/><text x="648" y="427" font-size="10" fill="#3d2b1a" font-family="Nunito,sans-serif" font-weight="600">major stop</text>
+        <circle cx="638" cy="440" r="5" fill="#c4a882" stroke="#5c3d1e" stroke-width="1.5"/><text x="648" y="444" font-size="10" fill="#3d2b1a" font-family="Nunito,sans-serif" font-weight="600">California base</text>
+        <circle cx="638" cy="457" r="5" fill="#d4614a" stroke="#8b1a0a" stroke-width="1.5"/><text x="648" y="461" font-size="10" fill="#3d2b1a" font-family="Nunito,sans-serif" font-weight="600">significant event</text>
+      </svg>
+      <div class="m-route-grid">
+        <div class="m-rc"><div class="m-rc-l">departed</div><div class="m-rc-v">Sep 28, 2025 — Anchorage, AK</div></div>
+        <div class="m-rc"><div class="m-rc-l">returned</div><div class="m-rc-v">Mar 9, 2026 — Anchorage, AK</div></div>
+        <div class="m-rc"><div class="m-rc-l">countries</div><div class="m-rc-v">USA + Canada</div></div>
+        <div class="m-rc"><div class="m-rc-l">vehicles</div><div class="m-rc-v">Maggie's ambulance + Beckett's Crosstrek (RIP)</div></div>
+      </div>
+    </div>
+
+    <div class="m-stops-title">Every stop, in order</div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot start"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Anchorage, Alaska</div>
+        <div class="m-date">September 28, 2025 — departure</div>
+        <div class="m-desc">Left at 9pm on September 28th with the ambulance ceiling still drying. Floor buried in unsorted bags. Maddie in her own van, about to caravan 5,000 miles with us. Drove out on the Seward Highway into the dark.</div>
+        <div class="m-hls"><span class="mhl">seward highway</span><span class="mhl">alaska highway</span><span class="mhl">day 1</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Yukon Territory, Canada</div>
+        <div class="m-date">Late September / Early October 2025</div>
+        <div class="m-desc">The Alaska Highway through the Yukon is one of the most remote drives in the world. Long, flat, huge sky, almost no one else. Crossed at Beaver Creek. Maddie was about 45 minutes ahead of us most of the time.</div>
+        <div class="m-hls"><span class="mhl">alaska highway</span><span class="mhl">beaver creek border</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot crash"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Route 99, Sea to Sky Highway, BC</div>
+        <div class="m-date">October 2–3, 2025</div>
+        <div class="m-desc">Woke up in Prince George on Oct 2nd and turned onto Route 99 for a Whistler detour. Brakes started failing on a steep descent — smoking at the bottom, ignored the signs. Hours later I was asleep in the back when Maggie woke me up screaming. Brakes completely gone, 25mph into a hairpin. She steered us into a gap in the trees — an unmarked runaway lane — and we stopped on the grass. Maddie drove back 45 minutes the next morning to jump our dead battery. Started on the last possible attempt before the tow truck loaded us.</div>
+        <div class="m-hls"><span class="mhl r">brake failure</span><span class="mhl r">runaway lane</span><span class="mhl">maddie saved us</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Vancouver & North Vancouver, BC</div>
+        <div class="m-date">~October 4–9, 2025</div>
+        <div class="m-desc">Parked at Stanley Park for the long weekend. Lime scooters, dispensaries, transit. Monday, Supertech Auto quoted $9,000 CAD to fix the brakes — a complete scam. Another shop called and said it was egregious. Dan's shop found the real problem: a blown brake line Supertech missed entirely. Half the pads, half the calipers, no rotors. Final bill $4,500 CAD ($3,300 USD).</div>
+        <div class="m-hls"><span class="mhl">stanley park</span><span class="mhl r">supertech scam</span><span class="mhl">dan fixed it ✓</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Whistler → North Cascades → Seattle → Portland</div>
+        <div class="m-date">October 2025</div>
+        <div class="m-desc">Finally made it to Whistler — the whole reason we took Route 99. Then south into Washington: Diablo Lake in North Cascades (turquoise water from glacial flour), Maple Pass in fall color, Skyline Loop at Rainier. A day or two in Seattle. One night in Portland.</div>
+        <div class="m-hls"><span class="mhl">whistler</span><span class="mhl">diablo lake</span><span class="mhl">maple pass</span><span class="mhl">mount rainier</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Oregon Coast → Redwoods → Southern California</div>
+        <div class="m-date">October / November 2025</div>
+        <div class="m-desc">Two days on the Oregon Coast — Depoe Bay, Yachats, Florence, Neptune State Park. Slept to waves both nights. Then the Redwoods and the Big Tree. PCH south. Into California and based in SoCal from November onward.</div>
+        <div class="m-hls"><span class="mhl">oregon coast</span><span class="mhl">redwoods</span><span class="mhl">PCH</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot start"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Southern California</div>
+        <div class="m-date">November 2025 – February 20, 2026</div>
+        <div class="m-desc">Griffith Observatory at golden hour. Laguna Beach in winter. The Grand Canyon — Ooh-Aah Point on the South Kaibab Trail, where the whole thing opens up. Hoover Dam. November 1st flew to Raleigh, packed all of Beckett's stuff into the Crosstrek, drove it cross-country back to LA.</div>
+        <div class="m-hls"><span class="mhl">griffith observatory</span><span class="mhl">laguna beach</span><span class="mhl">grand canyon</span><span class="mhl">hoover dam</span><span class="mhl">raleigh trip</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot crash"></div><div class="m-dash"></div></div>
+      <div>
+        <div class="m-place">Little Teslin Lake, Yukon Territory</div>
+        <div class="m-date">March 5, 2026</div>
+        <div class="m-desc">Heading north in the Crosstrek on March 5th — exactly one year to the day I first flew into Anchorage. The car rolled near Little Teslin Lake on the Alaska Highway. Walked away. Maggie drove the ambulance up to get me. A few days in Whitehorse, then home.</div>
+        <div class="m-hls"><span class="mhl r">crosstrek totaled</span><span class="mhl r">little teslin lake</span><span class="mhl">whitehorse recovery</span></div>
+      </div>
+    </div>
+
+    <div class="m-stop">
+      <div class="m-sl"><div class="m-dot home"></div></div>
+      <div>
+        <div class="m-place">Anchorage, Alaska</div>
+        <div class="m-date">March 9, 2026 — home</div>
+        <div class="m-desc">Drove the ambulance from Whitehorse back to Anchorage. Same city I landed in 366 days earlier. Very different person.</div>
+        <div class="m-hls"><span class="mhl">home</span><span class="mhl">full circle</span></div>
+      </div>
+    </div>
+
+    <div class="m-next">
+      <div class="m-next-l">what's next</div>
+      <div class="m-next-t">Truck camper build — fall 2026</div>
+      <div class="m-next-s">The plan: used pickup truck and a truck bed camper by September/October 2026. Alaska summers, nomadic through the lower 48 each fall and winter. The Crosstrek is gone. The plan isn't.</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-logo" onclick="showPage('journal')">bdpaiton</div>
+    <div class="footer-note">the route keeps changing</div>
+  </div>
+</div>
+
+<!-- ═══════════════ ABOUT ═══════════════ -->
+<div id="page-about" class="page">
+  <div class="a-hero">
+    <div class="a-eyebrow">the person behind this</div>
+    <h1 class="a-title">Hey.<br>I'm <em>Beckett.</em></h1>
+    <div class="a-rule"></div>
+    <p class="a-bio">I grew up in Raleigh, NC. In March 2025 I flew to Anchorage to get my pilot's license. I got a lot of other things instead — a summer in Alaska, a job launching floatplanes at Lake Hood, a girlfriend who lives in an ambulance, and a trip that took us from the Yukon to the Grand Canyon and back. This site is my attempt to not forget any of it.</p>
+  </div>
+  <div class="tx"></div>
+  <div class="a-body">
+
+    <div class="a-section">
+      <div class="a-sec-l">what I actually believe</div>
+      <div class="a-values">
+        <div class="a-val"><div class="a-val-icon">🌲</div><div class="a-val-t">The earth matters</div><div class="a-val-d">Old growth forests in BC, bears fishing at Katmai, the Grand Canyon at dawn — none of this is guaranteed to last. Every mile of this trip made me care more about protecting it.</div></div>
+        <div class="a-val"><div class="a-val-icon">🍄</div><div class="a-val-t">Slow down</div><div class="a-val-d">The best moments were the unplanned ones. Staying two extra days somewhere because it held us. Sleeping to waves on the Oregon Coast. Not everything needs a schedule.</div></div>
+        <div class="a-val"><div class="a-val-icon">🌿</div><div class="a-val-t">Less is more</div><div class="a-val-d">Everything I own fit in a Crosstrek. Turns out that's enough. The stuff you thought you needed mostly just gets in the way when you're trying to get somewhere.</div></div>
+        <div class="a-val"><div class="a-val-icon">✊</div><div class="a-val-t">People over profit</div><div class="a-val-d">Dan the mechanic in North Vancouver, Maddie turning around 45 minutes without being asked — these are the people that make things work. Not the guys quoting $9,000 for brakes.</div></div>
+      </div>
+    </div>
+
+    <div class="a-section">
+      <div class="a-sec-l">the real timeline</div>
+      <div class="a-tl">
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Oct 2024</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Uncle says: come to Alaska, get your license</div><div class="a-tl-d">UPS pilot, Anchorage, Cessna 172. Said come up in summer 2025. Said yes immediately.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Feb 21, 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Booked the flight. Put in two weeks notice at Backyard Burger.</div><div class="a-tl-d">First time I'd felt okay in months.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Mar 5, 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Flew into Anchorage</div><div class="a-tl-d">Got a job at Regal Air launching floatplanes at Lake Hood. Hosted at Sorrento's Italian on weekends. Hiked everything. Flew three times with my uncle in the Mat-Su Valley. Did not get a pilot's license.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Jul 5, 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Maggie DM'd me</div><div class="a-tl-d">Met her at Sorrento's. She reached out first. By August 5th I was asking her to be my girlfriend on the mattress in her ambulance at 11pm.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Sep 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Built out the ambulance in three weeks</div><div class="a-tl-d">Eight urgent care visits between us. Got tonsillitis. Kept building. Finished the ceiling the day we left.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Sep 28, 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Left Anchorage, 9pm</div><div class="a-tl-d">Heading south with Maggie and Maddie. Plan: North Carolina eventually. What actually happened: everything else.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Oct 2–9, 2025</div><div class="a-tl-dot" style="background:#d4614a"></div></div><div><div class="a-tl-t">BC brake disaster</div><div class="a-tl-d">Route 99 nearly killed us. Maggie steered into a runaway lane at 25mph in the dark. Supertech quoted $9,000. Dan fixed it for $3,300. Left with a good story.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Oct–Nov 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Washington, Oregon, Redwoods, California</div><div class="a-tl-d">Diablo Lake, Maple Pass, Rainier, Oregon Coast, the Big Tree, PCH south.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Nov 1, 2025</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Flew to Raleigh, drove the Crosstrek to LA</div><div class="a-tl-d">Packed everything from my parents' house. Drove it cross-country back to Southern California. Closed a chapter.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Nov–Feb 2026</div><div class="a-tl-dot"></div></div><div><div class="a-tl-t">Based in Southern California</div><div class="a-tl-d">Griffith Observatory. Laguna Beach. Grand Canyon. Hoover Dam.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Mar 5, 2026</div><div class="a-tl-dot" style="background:#d4614a"></div></div><div><div class="a-tl-t">Rolled the Crosstrek near Little Teslin Lake</div><div class="a-tl-d">One year to the day I first flew into Anchorage. Car didn't make it. I did. Maggie drove up in the ambulance. Few days in Whitehorse.</div></div></div>
+        <div class="a-tl-item"><div class="a-tl-left"><div class="a-tl-date">Mar 9, 2026</div><div class="a-tl-dot" style="background:#c4a882"></div></div><div><div class="a-tl-t">Back in Anchorage</div><div class="a-tl-d">Same city. Different person.</div></div></div>
+      </div>
+    </div>
+
+    <div class="a-section">
+      <div class="a-sec-l">what I'm working with right now</div>
+      <div class="a-gear">
+        <div class="a-gear-item"><div class="a-gear-n">Maggie's ambulance</div><div class="a-gear-d">Home. Built it ourselves. Survived everything.</div></div>
+        <div class="a-gear-item"><div class="a-gear-n">MacBook Air M4</div><div class="a-gear-d">How this site gets written.</div></div>
+        <div class="a-gear-item"><div class="a-gear-n">The camera</div><div class="a-gear-d">Everything in the photos tab.</div></div>
+        <div class="a-gear-item"><div class="a-gear-n">WGU enrollment</div><div class="a-gear-d">Self-paced degree, from wherever I am.</div></div>
+        <div class="a-gear-item"><div class="a-gear-n">The next vehicle</div><div class="a-gear-d">Pickup + camper by fall 2026. Crosstrek's gone. Plan isn't.</div></div>
+        <div class="a-gear-item"><div class="a-gear-n">Maggie</div><div class="a-gear-d">Met her at a restaurant. She steered us into a runaway lane and saved both our lives. Good person to have around.</div></div>
+      </div>
+    </div>
+
+    <div class="a-section">
+      <div class="a-contact">
+        <div class="a-contact-t">Say something</div>
+        <div class="a-contact-s">If you're living in a vehicle, planning a big drive, or just want to talk about any of this — I'm around.</div>
+        <a class="a-contact-btn" href="mailto:your@email.com">send a message</a>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer">
+    <div class="footer-logo" onclick="showPage('journal')">bdpaiton</div>
+    <div class="footer-note">somewhere in alaska</div>
+  </div>
+</div>
+
+</div><!-- end .site -->
+
+<script>
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  const i=['journal','photos','map','about'].indexOf(n);
+  if(i>=0)document.querySelectorAll('.nav-btn')[i].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.fc').forEach(c=>{
+  c.addEventListener('click',function(){
+    document.querySelectorAll('.fc').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+document.querySelectorAll('.p-ab').forEach(c=>{
+  c.addEventListener('click',function(){
+    document.querySelectorAll('.p-ab').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>
